@@ -11,8 +11,6 @@ public class MovieItem {
     private String title;
     private double voteAverage;
 
-    public MovieItem() {}
-
     public MovieItem(String posterPath, String overview, String releaseDay,
                      String title, double voteAverage) {
         this.posterPath = "http://image.tmdb.org/t/p/w185/" + posterPath;

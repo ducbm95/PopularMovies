@@ -1,5 +1,6 @@
 package com.lazymonster.popularmovies;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -33,8 +34,11 @@ public class DetailFragment extends Fragment {
         TextView releaseDay = (TextView) view.findViewById(R.id.tv_releaseday);
         TextView overview = (TextView) view.findViewById(R.id.tv_overview);
 
+        Drawable noImage = getContext().getResources().getDrawable(R.drawable.no_image);
         Picasso.with(getContext())
                 .load(mMovieItem.getPosterPath())
+                .placeholder(noImage)
+                .error(noImage)
                 .into(thumbnail);
         title.setText(mMovieItem.getTitle());
         rating.setText("Rating: " + mMovieItem.getVoteAverage() + "/10");

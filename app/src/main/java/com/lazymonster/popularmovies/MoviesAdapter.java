@@ -3,16 +3,13 @@ package com.lazymonster.popularmovies;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -41,8 +38,11 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(MoviesAdapter.ViewHolder holder, final int position) {
+        Drawable noImage = context.getResources().getDrawable(R.drawable.no_image);
         Picasso.with(context)
                 .load(mMovieItems.get(position).getPosterPath())
+                .placeholder(noImage)
+                .error(noImage)
                 .into(holder.image);
 
         int width = getScreenWidth();

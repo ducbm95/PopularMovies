@@ -6,19 +6,19 @@
 
     <ImageView
         android:id="@+id/iv_thumbnail"
-        android:layout_width="150dp"
-        android:layout_height="200dp"
-        android:layout_margin="15dp" />
+        android:layout_width="@dimen/detail_imageview_width"
+        android:layout_height="@dimen/detail_imageview_height"
+        android:layout_margin="@dimen/detail_default_margin" />
 
     <TextView
         android:id="@+id/tv_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_marginRight="15dp"
-        android:textSize="25sp"
+        android:layout_marginRight="@dimen/detail_default_margin"
+        android:layout_marginTop="@dimen/detail_default_margin"
         android:layout_toRightOf="@+id/iv_thumbnail"
-        android:textColor="#000000" />
+        android:textColor="@color/black"
+        android:textSize="@dimen/detail_title_textsize" />
 
     <TextView
         android:id="@+id/tv_rating"
@@ -37,19 +37,19 @@
     <RelativeLayout
         android:id="@+id/frame"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="@dimen/detail_overview_height"
         android:layout_below="@+id/iv_thumbnail"
-        android:layout_marginLeft="15dp"
-        android:layout_marginRight="15dp"
-        android:background="#ea6153">
+        android:layout_marginLeft="@dimen/detail_default_margin"
+        android:layout_marginRight="@dimen/detail_default_margin"
+        android:background="@color/overview_background">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="@string/overview"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp" />
+            android:textColor="@color/white"
+            android:textSize="@dimen/detail_overview_textsize" />
 
     </RelativeLayout>
 
@@ -58,6 +58,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/frame"
-        android:layout_margin="15dp" />
+        android:layout_margin="@dimen/detail_default_margin" />
 
 </RelativeLayout>

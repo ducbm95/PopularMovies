@@ -1,7 +1,10 @@
 package com.lazymonster.popularmovies;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -21,6 +24,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,10 +34,15 @@ import java.util.List;
  */
 public class MainFragment extends Fragment {
 
+    private static Context context;
+
     public static List<MovieItem> mMovieItems;
     private MoviesAdapter mAdapter;
+
     public static int mCheckedItem;
     private int mLastCheckedItem;
+
+    private MoviesLoader mLoader = null;
 
     public MainFragment() {
     }
@@ -40,7 +50,10 @@ public class MainFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        context = getContext();
         setHasOptionsMenu(true);
+        if (!isNetworkAvailable())
+            notifyNetworkNotAvailable();
     }
 
     @Override
@@ -55,7 +68,8 @@ public class MainFragment extends Fragment {
         mAdapter = new MoviesAdapter(mMovieItems);
         recyclerView.setAdapter(mAdapter);
 
-        new LoadMovies().execute();
+        mLoader = new MoviesLoader();
+        mLoader.execute();
         return rootView;
     }
 
@@ -68,11 +82,10 @@ public class MainFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
-
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
             String[] colors = new String[]{
-                    "Most Popular",
-                    "Highest-rated"
+                    getResources().getString(R.string.popular_title),
+                    getResources().getString(R.string.toprated_title)
             };
             builder.setSingleChoiceItems(colors, mCheckedItem, new DialogInterface.OnClickListener() {
                 @Override
@@ -85,8 +98,10 @@ public class MainFragment extends Fragment {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     if (mCheckedItem != mLastCheckedItem) {
-                        mMovieItems.clear();
-                        new LoadMovies().execute();
+                        if (!isNetworkAvailable())
+                            notifyNetworkNotAvailable();
+                        mLoader = new MoviesLoader();
+                        mLoader.execute();
                         mLastCheckedItem = mCheckedItem;
                         switchToolbarTitle();
                     }
@@ -101,6 +116,16 @@ public class MainFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mCheckedItem = 0;
+        mMovieItems.clear();
+        if (mLoader != null)
+            mLoader.cancel(true);
+        mLoader = null;
+    }
+
     private void switchToolbarTitle() {
         ActionBar actionBar = ((AppCompatActivity) getContext()).getSupportActionBar();
         if (actionBar != null)
@@ -111,24 +136,64 @@ public class MainFragment extends Fragment {
             }
     }
 
-    class LoadMovies extends AsyncTask<Void, Void, Void> {
+    private void notifyNetworkNotAvailable() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Error");
+        builder.setMessage("No internet connection");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                onDestroy();
+                getActivity().onBackPressed();
+            }
+        });
+        builder.show();
+    }
 
-        private final String BASE_POPULAR_URL = "http://api.themoviedb.org/3/movie/popular?api_key=";
-        private final String BASE_TOP_URL = "http://api.themoviedb.org/3/movie/top_rated?api_key=";
+    private boolean isNetworkAvailable() {
+        ConnectivityManager cm = (ConnectivityManager)
+                getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        // if no network is available networkInfo will be null
+        // otherwise check if we are connected
+        if (networkInfo != null && networkInfo.isConnected()) {
+            return true;
+        }
+        return false;
+    }
+
+    class MoviesLoader extends AsyncTask<Void, Void, Void> {
+
+        private final String BASE_POPULAR = "popular";
+        private final String BASE_TOP = "top_rated";
 
         @Override
         protected Void doInBackground(Void... params) {
-            String url = null;
+            String typeQuery;
             if (mCheckedItem == 0)
-                url = BASE_POPULAR_URL;
+                typeQuery = BASE_POPULAR;
             else
-                url = BASE_TOP_URL;
-            url += getResources().getString(R.string.my_api_key);
-            HttpHelper helper = new HttpHelper();
-            try {
-                JSONObject object = new JSONObject(helper.getJSON(url));
-                JSONArray arr = object.getJSONArray("results");
+                typeQuery = BASE_TOP;
 
+            Uri.Builder builder = new Uri.Builder();
+            builder.scheme("http")
+                    .authority("api.themoviedb.org")
+                    .appendPath("3")
+                    .appendPath("movie")
+                    .appendPath(typeQuery)
+                    .appendQueryParameter("api_key", context.getResources().getString(R.string.my_api_key));
+
+            URL url = null;
+            try {
+                url = new URL(builder.build().toString());
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            try {
+                HttpHelper helper = new HttpHelper();
+                JSONObject object = new JSONObject(helper.getJSON(url.toString()));
+                JSONArray arr = object.getJSONArray("results");
+                mMovieItems.clear();
                 for (int i = 0; i < arr.length(); i++) {
                     Object o = arr.get(i);
                     JSONObject movie = new JSONObject(o.toString());
@@ -141,7 +206,7 @@ public class MainFragment extends Fragment {
                     );
                     mMovieItems.add(item);
                 }
-            } catch (JSONException e) {
+            } catch (JSONException | NullPointerException e) {
                 e.printStackTrace();
             }
             return null;
