@@ -1,0 +1,11 @@
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tv_header"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/detail_overview_height"
+    android:layout_marginLeft="@dimen/detail_default_margin"
+    android:layout_marginRight="@dimen/detail_default_margin"
+    android:background="@color/overview_background"
+    android:gravity="center"
+    android:text="@string/overview"
+    android:textColor="@color/white"
+    android:textSize="@dimen/detail_overview_textsize" />

@@ -1,4 +1,4 @@
-package com.lazymonster.popularmovies;
+package com.lazymonster.popularmovies.Utils;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

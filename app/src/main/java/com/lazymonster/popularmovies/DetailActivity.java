@@ -26,10 +26,13 @@ public class DetailActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
             if (MainFragment.mCheckedItem == 0) {
                 actionBar.setTitle(getResources().getString(R.string.popular_title));
-            } else {
+            } else if (MainFragment.mCheckedItem == 1) {
                 actionBar.setTitle(getResources().getString(R.string.toprated_title));
+            } else {
+                actionBar.setTitle(getResources().getString(R.string.favorite));
             }
         }
+
     }
 
     @Override
